@@ -2,7 +2,8 @@ import sys
 import socket
 import threading
 
-HEX_FILTER = ''.join([(len(repr(chr(i))) == 3) and chr(i) or '.' for i in range (256)])
+HEX_FILTER = ''.join(
+    [(len(repr(chr(i))) == 3) and chr(i) or '.' for i in range(256)])
 
 def hexdump(src, length=16, show=True):
     if isinstance(src, bytes):
@@ -15,7 +16,7 @@ def hexdump(src, length=16, show=True):
         printable = word.translate(HEX_FILTER)
         hexa = ' '.join([f'{ord(c):02X}' for c in word])
         hexwidth = length*3
-        results.append(f'{i:04x} {hexa:<{hexwidth}} {printable}')
+        results.append(f'{i:04x}  {hexa:<{hexwidth}}  {printable}')
     if show:
         for line in results:
             print(line)
@@ -53,13 +54,13 @@ def proxy_handler(client_socket, remote_host, remote_port, receive_first):
 
     remote_buffer = response_handler(remote_buffer)
     if len(remote_buffer):
-        print("[<--] Sending %d bytes to locatlhost." % len(remote_buffer))
+        print("[<==] Sending %d bytes to localhost." % len(remote_buffer))
         client_socket.send(remote_buffer)
 
     while True:
         local_buffer = receive_from(client_socket)
         if len(local_buffer):
-            line = "[==>] Received %d bytes from localhost." % len(local_buffer)
+            line = "[==>]Received %d bytes from localhost." % len(local_buffer)
             print(line)
             hexdump(local_buffer)
 
@@ -101,7 +102,7 @@ def server_loop(local_host, local_port,
         # print out the local connection information
         line = "> Received incoming connection from %s:%d" % (addr[0], addr[1])
         print(line)
-        # start a thread to talk to the remote host
+        # start a threat to talk to the remote host
         proxy_thread = threading.Thread(
             target=proxy_handler,
             args=(client_socket, remote_host,
@@ -125,9 +126,10 @@ def main():
         receive_first = True
     else:
         receive_first = False
-
+    
     server_loop(local_host, local_port,
         remote_host, remote_port, receive_first)
 
 if __name__ == '__main__':
     main()
+    

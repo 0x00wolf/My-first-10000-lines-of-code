@@ -1,0 +1,155 @@
+>>OpenSecurityTraining2
+/home/anon$ Dbg1012 - Beginner GDB 
+
+flags:
+compile with: -g 
+to surpress warnings: -w
+
+commands:
+refresh the display" (gdb) refresh (or ctrl-L)
+run the program: (gdb) run (r)
+see your code: layout next
+set a breakpoint: break <POINT> 
+    *can be a line number, function name, etc.
+step: next (n)
+continue (to next break point): continue
+print a variable's name: print <VARIABLE>
+print an array: print *arr@len
+watch a variable for changes: watch <VARIABLE>
+step through program from line 1: start <program>
+info on breakpoints: info breakpoint/info b
+delete a breakpoint: delete Num 
+    *num can be retrieved from info b
+
+Watchpoints:
+example: watch *<address>
+remeber to declare addresses are pointers
+break on watch points: rwatch
+
+Hardware break on execute:
+hb *<0xaddress>
+
+info registers: info r
+    info r rax, rbp, rip
+print command: p/x $rax
+               p/u $rax
+               p/gd $ax
+
+The "set" sign can be used in conjunction with an
+equals sign to set registers
+examplse:
+set $rax = 0xdeadbeef
+p/x $rax
+$1 = 0xdeadbeef
+set $ax = 0xcafef00d
+p/x $rax
+$2 = 0xdeadbeef
+
+Viewing Memory:
+The "x" command for examine memory accepts /FMT specifier
+ex.:
+x/8xb $rsp
+x/4xh $rsp
+x/2xw $rsp
+x/s <0xaddre55>
+x/3i $rip
+
+Modifying Memory
+Memory can be modified with teh "set" command,
+also optionally specifying a C-style type order
+to specify the length to write
+
+(gdb) x/1xg $rsp
+<0xaddre55>: <0xaddre55>
+(gdb) set {char}$rsp = 0xFF
+(gdb) x/1xg $rsp
+<0xaddre55>: <0xaddre55>
+(gdb) set {short}$rsp = 0xFFFF
+(gdb) x/1xg $rsp
+<0xaddre55>: <0xaddre55>
+set {long long}$rsp = 0x1337b33f
+print $rsp
+0x1337b33f
+
+Updating Stack View
+ex.:
+display/8x $rsp
+b examplepoint
+display/10i $rip
+x/10xg $rsp
+x/10i $rip
+
+Stack Backtrace
+provides a call stack backtrace:
+(gdb) bt
+
+Step Over vs. Step Into vs. Step Out
+indicates that the UI should step over call instructions -
+executing all instructions therein, but not showing the 
+debugger UI as stopped until the insttuction after the call
+instruction is reached. 
+"Step Into" will step into call instructions.
+"Step Out" will step until a function exit is reached.
+
+Step Over:
+nexti
+
+Step Into:
+stepi
+
+Step Out:
+finish
+
+example:
+b main
+display/10i $rip
+r
+x/10i $rip
+ni
+
+RUn until
+u *<0xaddre55>
+
+Attach to Process:
+echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
+ps aux
+gdb -q
+attach <process id>
+display/10i $rip
+display/10xg $rsp
+
+Changing Disassembly Syntax:
+set disassembly-flavor intel
+set disassembly-flavor att
+
+GDB Commands File
+can create a plain text file: ./gdbCfg
+& enter the set of gdb commands which you want to 
+be executed in gdb on startup, one per line
+To initalize start gdb with the -x option
+ex:
+gdb -x ./gdbCfg
+
+example gdbCfg:
+display/10i $rip
+display/10xg$rsp
+display/x #rax
+start
+
+example 2 ./gdbCfg:
+display/10i $rip
+display/x $rbp
+display/x $rsp
+display/x $rax
+display/x $rbx
+display/x $rcx
+display/x $rdx
+display/x $rdi
+display/x $rsi
+display/x $r8
+display/x $r9
+display/x $r12
+display/x $r13
+display/x $r14
+display/10gx $rsp
+start

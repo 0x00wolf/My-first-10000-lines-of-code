@@ -1,0 +1,395 @@
+pwd # print working directory
+whoami # checking the user currently logged in
+cd # change directory
+ls # list cmd. -l (displays detailed information) -a (show hidden)
+-h --help # get help. you need it
+man # manual pages
+locate # search for files
+whereis # searching for binaries, returns location and man pages
+which # only returns location of binary file
+find # more powerful search tool
+# usage: find / -type f -name dasfile
+# find /(where) -type f(type of file) -name the name you are looking for
+wildcards = ? replaces a single letter
+          = [] used to match characters that appear inside the brackets
+          = * any character(s) from none to an unlimited num
+grep # for filtering, usually used in a pipe |
+ps # processes
+# example:  ps aux | grep apache2
+cat # list contents
+# concatenation with cat example of writing to: cat > filetowriteto
+# appending: cat >> filetoappendto
+touch # creates a newfile, usage: touch filecreated
+mkdir # make directory
+cp # copy file, usage: cp file ./where/you/are/copying/to
+mv # move command. can be usedto change a files name
+rm # remove file, -r recursive to remove dir
+
+### Text manipulation ###
+head # show first 10 lines of file, usage: head -numoflines to show more or less
+tail # same as head but end of file
+nl # show file contents with lines numbered, nl aka numbered lines
+sed # used to find and replace, (s for substitution, g for global)
+#usage ex.: sed s/mysql/MySQL/g /location/of/file > newfilename
+
+#viewing files
+more # shows you one terminal window of contents and lets you page down, q to quit.
+less # less is more but allows you to search for files at any time adding '/searchquery'l
+
+### Analyzing network traffic ###
+ifconfig # getting network information
+iwconfig # getting information on network adapters
+# changing network information
+# changing your ip address: ifconfig eth0 123.456.789.101
+# changing broadcast addr and network mask:
+# ifconfig eth0 192.168.181.115 netmask 255.255.0.0 broadcast 192.168.1.255
+
+## spoofing a mac addr
+# ifconfig eth0 down
+# ifconfig eth0 hw ether 00:11:22:33:44:55
+# ifconfig eth0 up
+
+# assigning a new ip address from the dhcp server
+#dhclient eth0
+
+### Gaining information from manipulating the DNS
+dig # examining the dns. ns is nameserver
+# usage: dig example.com ns
+
+# changing dns, edit information in /etc/resolv.conf
+# ex: echo "nameserver 8.8.8.8"> /etc/resolv.conf
+
+# Mapping your own ip address (or how to hijack a tcp connection to direct traffic to a malicious web server)
+# /etc/hosts
+# ex add a websites named url and direct it's ip to a local website in /etc/hosts
+
+
+### chpt 4. adding and removing software ###
+apt-cache search keyword # searching for a package
+apt-get install packagename # adding software
+apt-get remove packagename # removing software
+apt-get update # updating packages
+apt-get upgrade # upgrading packages
+# adding packages: put url in /etc/apt/sources.list
+# installing from git: git clone
+
+### chpt 5. controlling file and directory permissions ###
+chown # change ownership command
+# usage: chown bob /tmp/bobsfile
+chgrp # granting ownership to a group
+# usage: chgrp groupis program
+chmod # change permissions for a file
+# usage ex.: chmod 774 filetochange.hcstat
+# can also use the UGO method. user, group, owner
+# chmod u+x, o+x  hashcat.hcstat
+
+# umask - a three digit octal number that is subtracted from the default permissions
+# to change the umask value for a user edit the /home/username/.profile
+
+## Granting temporary root permissions with SUID
+# to do so add the number 4 before the regular root permissions in chmod
+# example: chmod 4644 filename
+## Granting the root user's group permissions with SGID
+# to do so add the number 2 before the regular root permissions in chmod
+# example: chmod 2644 filename
+
+# The /etc/shadow file contains all of the users' passwords
+
+### Process Monitoring ###
+ps aux # see all running processes
+top # shows processes with the highest resources listed at the top
+# During hte top command H or ? will bring up a list of interactive commands
+# Q will quit
+nice # used to prioritize one process over others on a system
+# uses a scale of -20 to +19, a high value indicates a low priority
+# a low value indicates a high priority
+# -20 (most likely to receive priority), 0 (default value), +19 (least likely to receive priority)
+renice # alter the priority of a command after it has started
+# the nice command requires you increment the value, the renice command sets an absolute
+# ex: nice -n -10 /bin/slowprocess, would increment hte value of slowprocess by -10
+# ex2: nice -n 10 /bin/slowprocess, would increment the slow procewss by +10
+# renice uses the pid of the associated process
+# ex: renice 19 6996
+# you can renice as well from top by pressing r and putting in the pid number
+kill # ends a process. usage: kill-signal PID.
+# signals:  1) SIGHUP - hangup - stops the process and restarts with the same PID
+#           2) SIGINT - interrupt - weak kill signal that isn't guaranteed to work
+#           3) SIGQUIT - core dump - terminates the process and saves the process information in memory
+#                                    and then saves the information in the current working directory
+#           15) SIGTERM - termination - kills the process, the default for the kill command
+#           9) SIGKILL - the absolute kill signal, sends the process resources to a special device /dev/null
+# example: kill -9 6996
+killall # uses the process' name instead of the PID
+# example: killall -9 rogueprocess
+# You can use the kill command in top, just press k and enter the associated PID
+
+## Running processes in the background
+# When executing a process in the bash shell append an ampersand to the end of the command
+# ex: code exmaplefile &s
+bg # followed by the pid. Runs a process in the background
+fg # followed by the pid. Moves a process from the background to the foreground
+
+## Scheduling processes
+# there are two ways in linux: at and crond
+at # used to set up a daemon. usage = at + the time to execute the command
+# at examples
+#       at 7:20pm
+#       at 7:20pm June 25
+#       at noon
+#       at noon June 25
+#       at tomorrow
+#       at now + 20 minutes
+#       at now + 10 hours
+#       at now + 5 days
+#       at now + 3 weeks
+#       at 7:20pm 06/25/2022
+# after running the command you will be left with a command prompt to input the script >
+# the at command will input scripts until you enter ctrl+D
+atd # used to set up a daemon as a background process
+crond # used to set up a daemon to run regular tasks every day, week, or month
+
+### chpt 7. managing user environment variables ###
+env # lists the default environment variables
+# viewing all environment variables
+set | more # using the set command and piping it to the more
+HISTSIZE # the variabel for keeping track of the commands used in linux
+export # exports a variable from the current shell session
+PS1 # variabel for changing the default user@host variable in the bash shell
+# \w - pwd \u - name of the current user \h the hostname
+PATH # variable that controls where your shell will look for commands you enter
+# most commands are in the bin or sbin subdirectory: /usr/local/sbin or /usr/local/bin
+# Adding a path to PATH:
+#                       PATH=$PATH:/root/newhackingtool
+# Setting a variable:
+# variable='I am a variable'
+# referencing the variable:
+# echo $variable
+# result: I am a variable
+unset # removes a variable (usage: unset variable)
+echo $variable
+
+### Shell scripts ###
+
+#! /bin/bash
+# my first bash script. wish me lucks
+echo "Hello, Hackers-Arise"
+
+# set permissions & execute script:
+# cmod 755 scriptname
+# ./scriptname
+
+## port scanner script
+# using nmap:
+# nmap <type of scan><target IP><optionally, target port>
+nmap -sT 192.168.181.1
+nmap -sT 192.168.181.1 -p 3306 >/dev/null -oG MySQLscan
+
+
+### chpt. 9 - compressing and archiving ###
+
+# tarring files together
+tar -cvf examplefiles.tar examplefile1 examplefile2 examplefile3
+# c - create, v - verbose (optional), f - write to following file
+
+# t - displays contents of file
+tar -tvf examplefile.tar
+
+# x - extract
+tar -xvf examplefile.tar
+
+# extract silently
+tar -xf examplefile.tar
+
+# if an extracted file already exists tar will replace it as default behavior
+
+## compressing files
+# gzip, extensions: .tar.gz or .tgz     slowest, but smallest outcome
+# bzip2, extensins: .tar.bz2            midground
+# compress, .tar.z                      fastest, but largest (generally)
+
+# example: compress the previous examplefile.tar
+gzip examplefile.*
+# decompress:
+gunzip examplefile.* # unzipped file will be in .tar format not .tar.bz
+# bzip2:
+bzip2 examplefile.*
+bunzip2 examplefile.*
+# compress:
+compress examplefile.*
+uncompress examplefile.*
+# you can also use gunzip with files that have been shrunk with compress
+
+## creating a bit-by-bit or physical copies of storage devices with the dd command
+dd if=inpufile of=outputfile
+# example: copy of flashdrive, assuming flashdrive is sdb
+dd if=/dev/sdb of=/root/flashcopy
+# dd - the copy command, if - input file, /dev/sdb
+# of - output file, /root/flashcopy the output file
+# many other features to dd, ex. bs is blocksize (default=512 bytes)
+# typically the bs is set to the sector size of the drive being copied
+# most often this is 4096bytes, 4kb~
+
+
+### working with filesystems ###
+fdisk -l
+# displays drives & their capacity
+
+lsblk # list block. basic information about each block device in /dev
+
+## mounting storage devices
+mount /dev/sdb1 /mnt  # example hard drive
+mount /dev/sdc1 /media # example flash drive
+# unmounting an example hard drive
+umount /dev/sdb1
+# filesystems mounted at boot time /etc/fstab
+df # disk free - provides information on any mounted storage devices
+fsck # check filesystem for errors
+
+### chpt 11 - logging ###
+# logging daemons, rsyslog on debian distros
+locate rsyslog
+# archiving logs /var/log.rotate.conf
+
+## Covering your tracks ##
+# deleting files:
+shred <file>
+# usage: shred nameoffiletoshred
+# add -f to allow for overwriting
+# add -n <number> to specify the number of times you want the file overwritten
+# example of shredding the files in /var/log/auth.log.*
+shred -f -n 10 /var/log/auth.log.*
+## Disabling logging:
+# servcie servicename start|stop|restart
+# stop the logging daemon
+service rsyslog stop
+
+## Logging in remotely to MySQL
+
+# usage example mysql -u root -p 192.168.1.101
+# locally:
+mysql -u <username> -p
+#command to see what databases are avaialble (like .schema)
+show databases;
+# connect to database by useing the use command
+use exampledatabse;
+show tables;
+describe nameofinterest;
+
+
+
+### Using and abusing services
+
+
+### Chpt 13 Becoming Secure + Anonymous ###
+traceroute <ip>
+# Lists the hops between the current hardware network device and chosen ip
+
+proxychains
+# ex: proxychains nmap 999.999.999.99
+# to set up proxychains: /etc/proxychains.conf
+# add proxies or make sure tor is active
+# uncomment dynamic_chain if you set up multiple proxies and wish to use all that are available
+# other useful commands: random_chain, chain_len
+
+### Chapter 14, wifi and bluettoth hacking ###
+ifconfig
+# Information about all of your hosts hw AP
+
+iwconfig
+# Just information about the hosts wifi AP
+
+iwlist
+# usage: iwlist <interface> <action>
+# ex: iwlist wlan0 scan
+
+nmcli
+# network manager command line interface; a linux demon that provides a high-level interface
+# exmaple usage: nmcli dev wifi
+# nmcli can be used to connect to an ap
+# ex: nmcli dev wifi connect AP-SSID password thePassword
+# ex cont: nmcli dev wifi connect bell-830 password E1A54954C2C4
+
+## The basics of hacking wifi access points
+# Need MAC address of the target, Mac address of a client, and the channel the AP is operating on
+# 1st use airmon-ng to put your wifi card into promiscuous or monitor mode
+airmon-ng start|stop|restart interface
+# basic example wifi attack:
+#   airodump-ng -c <channelofAP2atk> -bssid <bssidofAP2atk> -w <nameoffiletosavepacketsto> wlan0mon
+#   aireplay-ng to deauth the clients nad capture the packets they send to reconnect
+#   aircrack-ng to crack the .cap file you collected
+
+## Hacking bluetooth
+# BlueZ linux bluetooth protocol stack
+# BlueZ toolz:
+hciconfig # similar to ifconfig, but for bluetooth
+hcitool # inquiry tool for BT
+hcidump # sbiff bluetooth communication
+
+# using hciconfig:
+#   hciconfig # to get adapter information
+#   hciconfig <adaptername> up to # to start bluetooth
+# scan:
+#   hcitool scan
+# inquire:
+#   hcitool inq
+# discover:
+#   sdptool browse <MACaddress>
+# ping local devices:
+#   l2ping <MACaddress> -c NumberOfPackets
+
+### chpt 15 the Kernel ###
+# checking kernal version:
+uname -a
+# or:
+cat /proc/version
+
+# sysctl commands to tune the kernel, to make changes:
+# <editor> /etc/sysctl.conf ex: vim /etc/sysctl.conf
+
+# older way of inserting/deleting modules into kernel:
+insmod # insert module into kernel
+rmmod # remove a module
+
+# check installed modules:
+lsmod # list installed modules
+# get more information on them:
+modinfo <modulename>
+
+modprobe # newer method of adding modules
+# -a (add), -r (remove)
+# ex:
+modprobe -a <module name>
+modprobe -r <module name>
+
+dmesg # prints out hte message buffer from the kernel
+
+### chapter 16: scheduling tasks ###
+# crontab (cron table) and crond (cron daemon)
+# To schedule tasks enter them into the cron tabel located at /etc/crontab
+# the cron table has 7 field. 1-5 for scheduling, 6 the user. 7 the absolute path
+# Fields:   1 (M)       2 (H)       3 (DOM)     4 (MON)    5 (DOW)      6 (user)     command path
+#           min         hour        day         month       weekday
+# values    0-59        0-23        1-31        1-12        0-6
+# ex:       30          2           *           *           1-5         root         /root/script
+# ex2: 00 9 * * * user /usr/share/examplescript.sh
+# ex2 means: The 9th hour of every day, every month run as user
+# ex3: 00 2 * 6-8 0,6 user /usr/share/examplescript.sh
+# ex3 means: The 2nd hour every day June-August Sunday & saturday
+# crontab shortcuts:
+# @yearly, @annually, @monthly, @midnight, @weekly, @ daily, @noon, @reboot
+# ex4: @midnight user /usr/share/examplescript.sh
+
+## Using rc scripts to run tasks at startup
+# the rc daemon runs scripts after the kernel has initialized
+# and loaded all of its modules, the kernel starts a daemon known
+# as init or initd. The daemon runs a num. of scripts in /etc/init.d/rc
+# You can add or remove services with 'update-rc.d'
+# ex:
+update-rc.d <name of script or service> <remove|defaults|disable|enable>
+
+### chpt 17: Python scripting ###
+# Popular python tools:  sqlmap, scapy, the Social-Engineer Toolkit (SET), w3af, and many more.
+# python packages download to /usr/local//lib/<pythonversion>/dist-packages
+# pysnmp: python directory for dealing with the snmp protocol
+# You can also download a module directly to the proper directory and run: python3 setup.py install
+## Exampine a python module: pip show <module>

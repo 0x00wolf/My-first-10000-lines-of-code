@@ -1,0 +1,480 @@
+>>> ABOUT THIS CLASS <<<
+14 assembly instructions account for 90% of code!
+http://www.blackhat.com/presentations/bh-usa-06/BH-US-06-Bilar.pdf
+
+by knowing 20-30 assembly instructions to accomplish almost anything
+
+Goals:
+1) know x86-64 general purpose registers and their 32 + 16 bit
+sub-register names
+2) understand how data like local variables or return addresses
+are stored on the stack
+3) Understand function calling conventions
+4) Be comfortable writing C code
+5) Be able to read assembly well enough to determine the expected
+inputs to influence the control flow for an opaque binary
+-> The infamous binary bomb lab
+
+>>> Basic conversions <<<
+Decimal (b. 10) Binary (b. 2)   Hexadecimal (b.16)
+00              0000b           0x00
+01              0001b           0x01
+02              0010b           0x02
+03              0011b           0x03
+04              0100b           0x04
+05              0101b           0x05
+06              0110b           0x06
+07              0111b           0x07
+08              1000b           0x08
+09              1001b           0x09
+10              1010b           0x0A
+11              1011b           0x0B
+12              1100b           0x0C
+13              1101b           0x0D
+14              1110b           0x0E
+15              1111b           0x0F
+
+<<< Registers >>>
+-=-=-=-=-=-=-=-=-
+Registers are small memory storage areas built into the 
+processor - volatile memory.
+
+Intel has 16 general purpose registers + the instruction
+pointer which points at the next instruction to execute.
+
+On x86-32 registers are 32 bits wide
+On x86-64 regstiers are 64 bits wide
+
+Evolution of the register:
+
+Intel 8-bit 8008
+A ->only 8 bits wide
+
+Intel 16-bit 8086
+AX - stands for 8 extended (16 bits)
+Could still access one byte at a time with A-Low or A-high
+
+Intel 32-bit 80386
+EAX - Extended AX
+32 bits wide, still access the ax 16 bit, or a-low or a-high
+
+AMD 64-bit opteron
+RAX aka R0 - Really-wide AX
+or just Register 0 to Register 15
+RAX/R0 -> 64-bits wide
+EAX/R0D(ouble word) -> 32-bits.
+AX/R0W -> 16-bits wide
+AH/AL/R0B(yte) -> 8-bits wide
+
+< General Purpose Registers >
+64-bit registers
+        32-bit registers
+                16-bit registers
+                                    Intel Suggested usecase:
+RAX aka R0              ->          -Stores function return
+    EAX aka R0D                     values
+        AX aka R0W
+        AH  |   AL/R0B
+
+RCX aka R1              ->          -Counter for string &
+    ECX aka R1D                     loop operations
+        CX aka R1W
+        CH  |   CL/R1B
+
+RDX aka R2                          -I/O pointer
+    EDX aka R2D                     x*not in class
+        DX aka R2W
+        DH  |   DL/R2B
+
+RBX aka R3                          -Base counter
+    EBX aka R3D                     x*not in class
+        BX aka R3W
+        BH  |   BL/R3B
+
+** Disassemblers often rename these in alphabetical order
+
+RSP aka R4          - Stack Pointer -Stack (top) pointer
+    ESP aka R4D
+        SP aka R4W
+            SPL/R4B
+
+RBP aka R5          - Base Pointer  -Stack frame base
+    EBP aka R5D                     pointer
+        BP aka R5W
+            BPL/R58
+
+RSI aka R6          - Stack Index   -Source index pointer
+    ESI aka R6D                     for string operations
+        SI aka R6W
+            SIL/R6B
+
+RDI aka R7          - Destination   -Destination index
+    EDI aka R7D       Index         pointer for string
+        DI aka R7W                  operations
+            DIL/R7B
+
+RIP                 - Instruction   -Pointer to next 
+    EIP               Pointer       instruction to execute
+        IP
+
+** The following introduced in the 64 bit extension
+
+R8
+    R8D
+        R8W
+            R8B
+
+R9 
+    R9D
+        R9W
+            R9B
+
+R10
+    R10D
+        R10W
+            R10B
+
+R11
+    R11D
+        R11W
+            R11B
+
+R12
+    R12D
+        R12W
+            R12B
+
+R13
+    R13D
+        R13W
+            R13B
+
+R14
+    R14D
+        R14W
+            R14B
+
+R15     |       |64bits/8bytes
+    R15D        |32bits/4bytes
+        R15W    |16bits/2bytes
+            R15B|8bits/1byte
+
+
+<<< The Stack >>>
+The stack is a Last In First Out (LIFO) Data structure.
+Data is "pushed" on top of the stack
+and "popped" off the top.
+
+The stack is a conceptual area of main memory (RAM)
+which is designated by the os when a program is started.
+
+Different OS's start it at different addresses by their
+own convention, or if they're using address space layout
+randomization (ASLR) it could actually change.
+
+    <<< Stack Diagram >>>
+
+        High Addresses
+       |=-=-=-=-=-=-=-|
+       |     Stack    | The stack grows down
+       |=-=-=-=-=-=-=-|
+       |              |
+       |=-=-=-=-=-=-=-| The heap grows up
+       |     Heap     |-> Where memory is allocated from
+       |=-=-=-=-=-=-=-|   things like malloc()
+       |=-=-=-=-=-=-=-|
+       |    Code      |
+       |-=-=-=-=-=-=-=|
+       |-=-=-=-=-=-=-=|
+       | Global Data  |
+       |=-=-=-=-=-=-=-|
+        Low Addresses
+
+The RSP register points to the top of the stack - The lowest
+address being used. Data will extist at addresses beyond the
+top of the stack and will be considered undefined.
+
+What's in the stack:
+->Return Addresses, so a called function can return back to 
+the function that called it.
+->Local variables.
+->Sometimes used to pass argumetns between functions.
+->Save space for registers so functions can share registers
+without smashing the value for each other.
+->Save space for registers when the compiler ahs to juggle
+too many in a function.
+->Dynamically allocated memory via alloca().
+
+
+--<<< How to read two-operand Instructions >>>---
+        <<<  Intel vs AT&T syntax  >>>
+
+Intel: Destination <-Source(s)
+    -Windows. Think alegra or C: y = 2x + 1
+    -mov    rbp, rsp
+    -add    rsp, 0x14; (rsp = rsp + 0x14)
+
+AT&T: Source(s) -> Destination
+    -*nix/GNU. Think elementary school: 1 + 2 =3
+    - mov %rsp, %rbp
+    - add $0x14,%rsp
+    - So regsiters get a % prefix and immediates get a $
+
+Local Variables:
+    Stored on the stack 
+
+
+Calling Conventions:
+    2 Elements of importance:
+    1) Register conventions - for which registers belong   
+        to the caller vs. callee
+    2) Parameter-passing conventions
+    Both are compiler-dependent
+    *This class only deals with MS "x64" ABI &
+    System V "x86-64" ABI
+    https://raw.githubusercontent.com/wiki/hjl-tools/x86-psABI/x86-64-psABI-1.0.pdf
+    https://learn.microsoft.com/en-us/cpp/build/x64-software-conventions?view=msvc-160
+
+    1) register conventions: Caller-Save Registers
+    caller-save registers - called "volatile" registers by MS
+    registers "belong" to the callee.
+    Visual Studio: RAX, RCX, RDX, R8, R9, R10, R11
+    GCC: RAX, RDI, RSI, RDX, RCX, R8, R9, R10, R11
+
+    1) register conventions: Callee-Save Registers
+    Also called "non-volatile" registers by MS.
+    Caller should assume they will not be changed by the
+        callee
+    Registers "belong" to the caller.
+    The Callee needs to use more registers than are saved
+        by the caller. The callee is responsible for making
+        sure the values are stored/restored so it doesn't 
+        break things for the caller
+    VisualStudio: RBX, RBP, RDI, RSI, R12-R15
+    GCC: RBX, RBP, R12-R15
+    1) register conventions: balance
+    Both caller and callee are responsible for balancing any
+    registers saves they perform(add to the stacks), with 
+    restores (removal from the stack).
+    -> Caller will typically save registers, right before
+    the call, and restore right after the call.
+    -> Callee will typically save regsiters at the beginning
+    of the function and restore at the end of the function.
+
+    Diagram VSS & GCC:
+    Who saved:
+    VS Caller       RAX     RCX RDX             R8-11
+    VS Callee           RBX         RSI RDI RBP     R12-15
+    SYS.V Caller    RAX     RCX RDX RSI RDI     R8-11
+    SYS.V Calleee       RBX                 RBP     R12-15
+    VS Parameters           1   2               3,4
+    GCC Parameters          4   3   2   1       5,6
+
+    2) Parameter-passing - Conventions: Common
+    ->x86-64 compilers use a subset of the caller-save 
+    registers to pass parameters into and out of functions
+    ->RAX or RDX:RAX passes out the return value.
+        -RAX holds anything 64bits or smaller
+        -RDX:RAX can be used to return 128bit values
+    2) Parameter-passing: Microsoft "x64" ABI
+    -> First 4 parameters (from left to right) are put into
+    RCX, RDX, R8, R9 respoectively
+    -> Remaining parameters "pushed" onto the stack so that
+    the left-most parameter is at the lowest address
+        -Typically "mov" is used instead of "push" thoughd
+    2) Parameter-passing: System V "x86-64" ABI (GCC et al.)
+    -> First 6 parameters (from left to right) are put into
+    RDI, RSI, RDX, RCX, R8, R9 respectively.
+    -> Remaining parameters "pushed" onto the stack so that
+    the left-most parameter is at the lowest address
+        - Typically "mov" is used instead of "push" though
+
+
+32-bit Stack Calling
+Calling Conventions - 1
+    >> In 32 bit code there are many more calling
+       conventions.
+        ->"cdecl" (default for most C code)
+            -Caller cleans up the stack
+        ->"stdcall" (for Windows' Win32 APIs)
+            -Callee cleans up the stack
+    >> Function parameters are pushed onto stack from
+       right to left.
+        ->leftmost parameter (the first function parameter)
+        ends up at the lowest address
+
+
+$ Control FLow
+    >>Two forms of flow control:
+        >Conditional - go somewhere if a condition is met.
+            -if, switches, loops
+        >Unconditional - always go somewhere. Function 
+        calls, goto, exceptions, interrupts
+
+    >>Call functions manifest themselves as call/ret
+    >>goto manifests itself in asm
+
+
+$ Architecture - RFLAGS
+
+  |-------------------------|--------------|--------------|
+64bit                     32bit          8bit            0
+ _________________________________________________________
+|                                                         |
+|                        RFLAGS                           |
+| _______________________________________________________ |
+                            |                             |
+                            |           EFLAGS            |
+                            |_____________________________|
+                                           |              |
+                                           |    FLAGS     |
+                                           |______________| 
+    >>In 64-bit mode, EFLAGS is extended to 64 bits and called
+    RFLAGS register is reserved. The lower 32 bits of the RFLAGS
+    register is reserved. The lower 32 bits of RFLAGS is the same
+    as EFLAGS.
+
+    >>RFLAGS register holds many single bit flags.
+      For now just 2:
+        ->Zero Flag (ZF) - Set if the result of some instruction
+          is zero; cleared otherwise.
+          The zero flag is in position 6.
+        ->Sign Flag (SF) - Set equal to the most-significant bit of 
+          the result, which is the sign bit of a signed integer. 
+          (0 inidcates a positive value and 1 indicates a negative value.)
+          The sign flag is in position 7.
+    
+    >>Flag Setting
+        ->Before you do a conditional jump, you need something to set
+          the condition status flags for you
+        ->Typically done with CMP, TEST or whatever instructions are 
+          already inline and happen to have flag-setting side-effects
+
+$ Xeno's Guide to (Mostly) Not Caring About Specific Flags
+
+    cmp dword ptr [rsp+4], eax
+    != jne 0000000140001033
+
+    cmp dword ptr [rsp+4], eax
+    <= (signed) jle 0000000140001043
+
+    cmp dword ptr [rsp+4], eax
+    >= (unsigned) jae 0000000140001043
+
+$ Inferences
+    >>There are different conditions for unsigned (JA) vs. signed (JG)
+      comparisons
+    >>Which leads to different assembly instructions for unsigned (JA)
+      vs. signed (JG) comparisons...
+    >>Which implies the compiler emits different code depending on 
+      whether the programmer declared variables as unsigned vs. signed...
+    >>Which a reverse engineer/decompiler can use to infer whether
+      variables are likely unsigned or signed...
+    
+    $ Less Obvious
+    >>It turns out that for instructions that set status flags (e.g 
+      arithmetic operations), the hardware just does the operation and 
+      sets flags as if the operands were both unsigned and signed.
+    >>Basically the hardware doesn't know or care about whether the humans
+      are currently interpreting the bits as signed or unsigned.
+      That's the compiler's problem to sort out.
+    >>The compiler must emit instructions which treat the bits as signed
+      or unsigned based on what's specified in the high level language.
+
+
+$ Boolean Operators
+    >>  0 is shorthand for "false"
+        1 is shorthand for "true"
+
+    AND
+    >>both inputs must be true
+    0 AND 0 = 0
+    0 AND 1 = 0
+    1 AND 0 = 0
+    1 AND 1 = 1
+
+    OR
+    >>true if either input is true
+    0 OR 0 = 0
+    0 OR 1 = 1
+    1 OR 0 = 1
+    1 OR 1 = 1
+
+    XOR
+    >>true if only one input is true
+    0 XOR 0 = 0
+    0 XOR 1 = 1
+    1 XOR 0 = 1
+    1 XOR 1 = 0
+
+    NOT
+    >>flips the value to the opposite value
+    NOT 1 = 0
+    NOT 0 = 1
+
+$ Boolean Logic in C
+    >>Logical Operators 
+        ->In C "logical" boolean operations, which operate
+          over a statement and are interpreted as true if
+          the results is non-zero or false if the result is
+          zero.
+        
+          AND is &&
+          OR is ||
+          NOT is !
+   
+    >>Bitwise Operators
+        ->In C "bitwise" boolean operations, the boolean 
+          operation is computed individually on each bit
+          in the same index of the two operands. So if 
+          you're doing a bitwise AND of two variables,
+          it is computed as:
+
+          output_bit[0] = input1_bit[0] AND input2_bit[0]
+          output_bit[1] = input1_bit[1] AND input2_bit[1]
+          .. snip
+          output_bit[N] = input1_bit[N] AND input2_bit[N]
+        
+          The bitwise AND operator is &
+          The bitwise OR operator is |
+          The bitwise XOR operator is ^
+          The bitwise NOT operator is ~0x76C30325
+
+$ GCC Inline Assembly
+    >>GCC uses GNU Assembler (gas) synatx == AT&T syntax
+    >>asm("instructions seperated by \n");
+    examples:
+    asm("nop");
+    asm("movw $1234, %eax");
+    
+    asm("movl -0x4(%rbp), %eax\n"
+        "cmp $0xdeadbeef,%eax\n"
+        "je myLabel\n"
+        "xor %eax, %eax\n"
+        "myLabel: movw $0xFFFF, %cx\n"
+        "and %ecx, %eax");
+
+    >>How to use C variables (aka "extended asm")
+        asm ( assembly template :
+              output operands   :           /*optional*/
+              input operands    :           /*optional*/
+              list of clobbered registers   /*optional*/
+        );
+        
+              #include <stdio.h>
+              void main(){
+                  int myVar = 0xabcd;
+                  //value into register from C variable
+                  asm("movl %0, %%eax, %0" : "=r" (myVar) );
+                  printf("myVar = %x\n", myVar);
+              }
+
+     >>Writing bytes to get ASM
+        ->You can specify exact bytes to use with
+        the ".byte" keyword, to place bytes to be
+        interpreted as code or data
+        _>Examples: 
+            asm(".byte 0x90"); is "nop"
+            asm(".byte 0x55); is "push %rbp"
+            asm(".byte 0x48; .byte 0x89; .byte 0xE5");
+                is "mov %rsp, %rbp"

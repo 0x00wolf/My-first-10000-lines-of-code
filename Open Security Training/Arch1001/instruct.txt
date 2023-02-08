@@ -1,0 +1,421 @@
+x86-64 Instructions:
+
+1) NOP
+-> No operation, no registers, no values, notta
+Just there to pad/align bytes, or to delay time.
+Attackers use it to make simple exploits more reliable.
+
+hex equivalent: 0x90
+
+
+2) Push:
+Push quadword onto the stack!
+-The push instruction automatically decrements the stack 
+pointer, RSP, by 8.
+
+In 64-bit execution mode, operand can be:
+    A) The value in a 64-bit register
+    B) A 64-bit value from memory, as given in "r/mX" form
+    talked about next.
+    *has caveats ignored here
+
+    <<"r/mX" Addressing forms>>
+    -r/mX Refers to the following: 
+        "r/m8", "r/m16", "r/m132",
+    or, "r/m64" in the Intel manual.
+    PUSH Word, Doubleword, or Quadword Onto the Stack
+    
+    -In Intel syntax usually square brackets, [],
+    means to treat the value within as a memory address,
+    and fetch the value at that address (like a 
+    dereferencing pointer)
+
+    -an "r/mX" can take 4 forms:
+    1) Register -> rbx
+    2) Memory, base-only -> [rbx]
+        go to address pointed to by rbx, dereference,
+        pull the value stored there.
+    3) Memory, base+index*scale -> [rbx+rcx*X]
+        *X is limited to 1, 2, 4, or 8
+    4) Memory, base+index*scale+displacement->
+        [rbx+rcx*X+Y]
+    -For Y of 1 byte (0-2^8) or 4 bytes (0-2^32)
+    [base + index*scale + displacement]
+    -Has natural applicability to multi-dimensional array
+    indexing, arrays of structs, etc.
+
+    examples:
+    Push Register:
+    push rbx
+
+    Push Memory:
+    push [rbx]
+    push [rbx+rcx*4]
+    push [rbx+rcx*8+0x20]
+
+
+3) Pop
+Pop a value from the stack
+In 64-bit execution mode, operand can be
+- A 64-bit register
+- A 64-bit memory address, as given in "r/mX" form
+
+
+4) RET
+Return from procedure
+Two forms:
+    1. Pop the top of the stack into RIP (remember
+        pop implicitly increments stack pointer, RSP)
+        -In this form the instruction is just written as
+        "ret".
+    2. Pop the top of the ***** into RIP and also add
+       a constant number of bytes to RSP
+        -In this form the instruction is written as
+        "ret 0x8", or "ret 0x20", etc
+
+
+5) CALL
+Call procedure
+->CALL's job is to transfer control to a different function
+in a way that control can later be resumed it left off.
+->First it pushes the address of the next instruction
+onto the stack
+    -For use by RET for when the procedure is done
+->Then it changes RIP to the address given in the
+instruction
+->Destination address for the target function can be 
+specified in multiple ways (absolute address, relative 
+address(relative to the end of the insturction, or some
+other register)).
+
+
+6) MOV - Move
+You can move:
+    -register to register
+    -memory to register, register to memory
+    -immediate to register, immediate to memory
+Never memory to memory!
+Memory addresses are given in "r/mX" form
+
+"r/mX" Addressing example:
+
+    immediate to memory:         immediate to register:
+mov [rbx], imm32            |   mov rbx, imm64
+mov [rbx+rcx*X], imm32      |    register to register:
+mov [rbx+rcx*X+Y], imm32    |   mov rbx, rax
+    register to memory:     |    memory to register 
+mov [rbx], rax              |   mov rax, [rbx]
+mov [rbx+rcx*X], rax        |   mov rax, [rbx+rcx*X]
+mov [rbx+rcx*X+Y], rax      |   mov rax, [rbx+rcx*X+Y]
+
+
+7)ADD and SUB
+Adds or Substracts, as expected
+Destination operand can be r/mX or register
+Source operand can be r/mX or register or immediate
+No source and destination as r/mXs, because that could
+allow for memory to memory transfer, which isn't allowed
+on x86.
+
+examples:
+add rsp, 8          -> (rsp = rsp + 8)
+sub rax, [rbx*2]    -> (rax = rax - memorypointedtoby(rbx*2)
+
+
+8) IMUL - Signed Multiply
+(MUL = unsigned multiply)
+-Three forms:
+one, two, or three operands
+-imul r/mX                      rdx:rax = rax * r/mX
+-imul reg, r/mX                 reg = reg * r/mX
+-imul reg, r/mX, immediate      reg = r/mX * immediate
+   
+    IMUL has 13 forms spread across 3 groups:
+>>  Group 1:
+    IMUL r/m8   |   AX = AL * r/m8
+        Calculates an 8 bit value no danger of truncation
+        Plucks the least significant 8 bits from RAX (AL),
+        and multiplies them by r/m8.
+        Stores the value in the AX register which is 16bits
+    IMUL r/m16  |   DX:AX = AX * r/m16
+        Take the least significant 16 bits of the RAX (AX),
+        and multiplies it by r/m16. DX:AX is a 32 bit value
+        DX the most significant bits, AX the least sig.
+    IMUL r/m32  |   EDX:EAX = EAX * r/m32
+        EAX 32 bits * 32 bits, into a 64 bit value.
+    IMUL r/m64  |   RDX:RAX = RAX * r/m64
+        RAX 64 bits * 64 bits and stores in 128bit value.
+        >>Examples:
+    IMUL r/m8   |   AX = AL * r/m8
+    registers before
+    r12 |   0x84
+    rax |   0x609966C1A977E177
+    registers after
+    r12 |   0x84
+    rax |   0x609966C1A977C65C
+
+>>  Group2: Two Operands
+    IMUL r16, r/m16 |   r16 = r16 * r/m16
+    IMUL r32, r/m32 |   r32 = r32 * r/m32
+    IMUL r64, r/m64 |   r64 = r64 * r/m64
+    Can cause truncation
+        >>Examples:
+    IMUL 32, r/m32  |   r32 = r32 * r/m32
+    registers before
+    r12 |   0x84
+    rax |   0x609966C1A977E177
+    ->imul r12d, eax
+    registers after
+    r12 |   0x0000000061D0415C
+    rax |   0x609966C1A977E177
+
+>>  Group 3: THree Operands, 8 Bit Immediate
+    IMUL r16, r/m16, imm8   |   r16 = r/m16 * sign-
+                                extended imm8 
+    IMUL r32, r/m32, imm8   |   r32 = r/m32 * sign-
+                                extended imm8
+    IMUL r64, r/m64, imm8   |   r64 = r/m64 * sign-
+                                extended imm8
+    Can cause truncation.
+        >>Examples:
+    IMUL r64, r/m64, imm32  |   r64 = r/m64 * sign-extended
+                                imm32
+    registers before
+    r12 |   0x84
+    rax |   0x609966C1A977E177
+    -> imul r12, rax, 12341234
+    registers after
+    r12 |   0xE5A3577504602A2C
+    rax |   0x609966C1A977E177
+
+>>  Group 4: Three Operands, 16 bit immediate
+    IMUL r16, r/m16, imm16  |   r16 = r/m16 * imm16
+>>  Group 5: Three Operands, 32 Bit Immediate
+    IMUL r32, r/m32, imm32  |   r32 = r/m32 * imm32
+    IMUL r64, r/m64, imm32  |   r64 = r/m64 * sign-
+                                extended imm32
+
+9) MOVZX - Move with zero extend
+   MOVSX - Move with sign extend
+    Typically used to move small values (from smaller types)
+    into larger registers (holding larger types).
+    Supports same r->r, r->m, m->r, i->m, i->r
+    forms seen in a normal MOV
+    ->Zero Extend: means the CPU unconsitionally fills the
+    high order bits of the larger register with zeros
+    ->Sign Extend means the CPU fills the high order bits
+    of the destination larger register with whatever the 
+    sign bit is set to on the smaller value.
+
+    MOVSXD - Move with sign extend 32bit up to 64bit
+    MOVSX technically only sign extends from 8 or 16 bit
+    values.
+    If you want to sign extend a 32 bit value to 64 bits,
+    you need to use MOVSXD.
+    There is no MOVZXD.
+    
+    >>Examples:
+    mov eax, 0xF00DFACE
+    movzx rbx, eax
+    rbx = 0x00000000'F00DFACE
+    movsxd rbx, eax
+    rbx = 0xFFFFFFFF'F00DFACE
+    Because the most signigficant bit of 0xF00DFACE is 1
+
+10) LEA - Load Effective Address
+    >>Uses the mX form ("m" in the manual), but is the
+      exception to the rule for the [] square brackets
+      syntax.
+    >>Frequently used with pointer arithmetic sometimes for
+      just arithmetic in general
+    >>Example:
+        lea rax, [rdx+rdx*8+5]
+        rax = 0x1015, not the value at 0x1015
+
+11) JMP - Jump
+    >>Unconditionally change RIP to given address
+    >>Ways to specify the address:
+        ->Short, relative (RIP = RIP of next instruction +
+        1 byte sign-extended-to-64 displacement)
+            -Frequently used in small loops
+            -Some disassemblers will indicate this with a 
+            mnemonic by writing it as "jmp short".
+            -jmp-2 == infinite loop for short relative jmp
+        ->Near, relative (RIP = RIP of next instruction +
+        4 byte sign-extended-to-64-bits displacement).
+        ->Near, absolute indirect (address calculated with
+        r/ m64).
+
+
+12) JCC - Jump if Condition is Met
+    >>If a condition is true, the jump is taken.
+      Otherwise it proceeds to the next instruction
+    >>There are more than 4 pages of conditional jump types!
+      Many are synonyms for each other.
+    >>JNE == JNZ (Jump if not equal, Jump if not zero,
+                  both check the Zero Flag (ZF) == 0)
+    >>Some notable instructions:
+        A = above, unsigned notion
+        B = below, unsigned notion
+        G = greater than, signed notion
+        L = ddless than, signed notion
+        E = Equal (same as Z, zero flag set)
+        N = Not (like "Not less than:" JNL)
+
+
+13) CMP - Compare Two Operands
+    >>"The comparison is perforned by subtracting the second operand
+       from the first operand and then setting the status flags in the
+       same manner as the SUB instruction."
+    >>Basically just SUB. Difference is that with SUB the result has to
+      be stored somewhere. With CMP the result is computed, the flags
+      are set, but the result is discarded.
+    >>Modifies CF, OF, SF, ZF, AF & PF
+
+14) AND - Bitwise AND
+    >>C binary operator "&" (not &&, that's logical AND)
+    >>Destination operand can be r/mX or register
+    >>Source operand can be r/mX or register or
+      immediate (No source and destination as r/mXs)
+
+15) OR - Bitwise OR
+    >>C binary operator "|" (not ||, that's logical OR)
+    >>Destination operand can be r/mX or register
+    >>Source operand can be r/mX or register or
+      immediate (No source and destination as r/mXs)
+
+16) XOR - Bitwise Exclusive OR
+    >>C binary operator "^"
+    >>Destination operand can be r/mX or register
+    >>Source operand can be r/mX or register or
+      immediate (No source and destination as r/mXs)
+    >>XOR is commonly used to zero a register, by
+      XORing it with itself, because it's faster than a MOV
+
+17) NOT - One's Complement Negation
+    >>C binary operator "~" (not !, that's logical NOT)
+    >>Single source/destination operand can be r/mX
+
+18) INC/DEC - Increment / Decrement
+    >>Single source/destination operand can be r/mX.
+    >>Increase or decrease the value by 1
+    >>When optimized, compilers will tend to favor not using inc/dec,
+      as directed by the Intel Optimization Guide. So their presence may
+      be indicateve of hand-written, or un-optimized code.
+    >>Modifies OF, SF, ZF, AF, PF and CF flags
+
+19) TEST - Logical Compare
+    >>"Computes the bit-wise AND of first operand (source 1 operand) 
+      and the second operand (source 2 operand) and sets the SF, ZF
+      and PF status flags according to the result."
+    >>Like CMP - sets flags, and throws away the result
+
+20) SHL - Shift Logical Left
+    >>Can be explicitly used with the C "<<" operator
+    >>First operand is either cl (lowest byte of rcd), or a 1 byte
+      immediate. The 2nd operand is the number of places to shift.
+    >>SHL multiplies the register by 2 for each place the value is
+      shifted. More efficient than a multiply instruction.
+    >>Bits shifted off the left hand side are "shifted into" (set) the 
+      carry flag (CF)
+    >>For purposes of determining if the CF is set at the end, think
+      of it as n independent 1 bit shifts.
+
+21) SHR - Shift Logical Right
+    >>Can be explicitly used with the C ">>" operator
+    >>First operand is either cl (lowest byte of rcx), or a 1 byte 
+      immediate. The 2nd operand is the number of places to shift.
+    >>It divides the register by 2 for each place the value is shifted.
+      More efficient than a divide instruction.
+    >>Bits shifted off the right hand side are "shifted into" (set)
+      the carry flag (CF).
+    >>For purposes of determining if the CF is set at the end think 
+      of it as n independent 1 bit shifts.
+
+22) SAR - Shift Arithmetic Right
+    >>Can be explicitly used with the C ">>" operator, if operands
+      are signed.
+    >>First operand (source and destination) is an r/mX.
+    >>Second operand is either cl (lowest byte of ecx), or a 1 byte
+      immediate. The 2nd operand is the number of places to shift.
+    >>It divides the register by 2 for each place the value is shifted.
+      More efficient than a divide instruction.
+    >>Each bit shifted off the right side is placed in CF.
+
+23) SAL - Shift Arithmetic Left
+    >>Actually behaves exactly the same as SHL!
+    >>First operand (source and destination) is an r/mX
+    >>Second operand is either cl (lowest bte of rcx), or a 1 byye
+      immediate. The 2nd operand is the number of places to shift.
+    >>It multiiplies the register by 2 for each place the value is
+      shifted. More efficient than a multiply instruction.
+    >>Each bit shifted off the left side is placed in CF.
+
+24) DIV - Unsigned Divide
+    >>Three Forms:
+        ->Unsigned divide ax by r/m8, al = quotient, ah = remainder
+        ->Unsigned divide edx:eax by r/m32, eax = quotient, edx = remainder
+        ->Unsigned divide rdx:rax by r/m64, rax = quotient, rdx = remainder
+    >>If dividend is 32/64bits, edx/rdx will just be set to 0 by the compiler
+      before the instruction 
+    >>If the divisor is 0, a divide by zero exception is raised.
+
+25) IDIV - Signed Divide
+    >>Three forms
+        ->Signed divide ax by r/m8, al = quotient, ah = remainder
+        ->Signed divide edx:eax by r/mX, eax = quotient, edx = remainder
+        ->Signed divide rdx:rax by r/m64, rax = quotient, rdx = remainder
+    >>If dividend is 32/64bits, edx/rdx will just be set to 0 by the compiler
+      before the instruction.
+    >>If the divisor is 0, a divide by zero exception is raised.
+
+26) REP STOS - Repeat Store String
+    >>STOS is one of a number of instructions that can have the "rep"
+      prefix added to it, which repeat a single instruction multiple times.
+    >>All rep operations use *cx register as a "counter" to determine how many times
+      to determine how many times to loop through the instruction. Each time it executes,
+      it decrements *cx by 1. Once *cx == 0, it continues to the next instruction.
+    >>Either it stores 1, 2, 4, or 8 bytes at a time.
+    >>Either fill 1 byte at [di] with al or
+      fill 1/2/4/8 bytes at [*di] with al/*ax.
+    >>Increments the *di register by 1/2/4/8 bytes at a time, so that the
+      repeated store operation is storing into consecutive locations.
+    >>So there are 3 piece which must happen before the actual rep stos occurs:
+        ->Set *di to the start destination.
+        ->Set *ax/al to the value to store,
+        ->Set *cx to the number of times to store
+    64bits
+    >>64 bit rep operations use rcx register as a "counter" to determine how many times
+      to loop through the instruction. Each time it executes, it decrements rcx by 1.
+      Once rcx == 0, it continues to the next instruction.
+    >>Either stores 1, 2, 4, or 8 bytes at a time
+    >>Fill 1/2/4/8 bytes at [rdi] with al/ax/eax/rax
+    >>Increment the rdi register by 1/2/4/8 bytes at a time, so that the repeated
+      store operation is storing into consecutive locations.
+    >>So there are 3 pieces which must happen before the actual rep stos occurs:
+        ->Set rdi to the start destination
+        ->Set rax/al to the value to store
+        ->Set rcx to the number of times to store
+
+27) REP MOVS - Repeat Move Data String to String
+    >>MOVS is one of a number of instructions that can have the "rep" prefix
+      added to it, which repeat a single instruction multiple times.
+        ->MOVS is its own instruction which can be called without the REP 
+          instruction prefix.
+    >>All rep operations use *cx register as a "counter" to determine
+      how many times to loop through the instruction. Each time it executes,
+      it decrements *cx. Once *cx == 0, it continues to the next instruction.
+    _>REP MOVS stores 1, 2, 4, or 8 bytes at a time.
+    _>Either fill 1 byte from [si] to [di] with or fill 1/2/4/8 bytes at
+      a time from [*si] to [*di]
+    _>Moves the *di and *si registers forward 1/2/4/8 at a time, so that
+      the repeated store operation is storing into consecutive locations.
+    _>So there are 3 pieces which must happen before the actual rep movs
+      occurs:
+        ->Set *si to the start source
+        ->Set *dx to the start destination
+        ->Set *cx to the number of times to store
+    _>Note: Unlike MOV, MOVS can move memory to memory... but only between
+      [*si] and [*di]
+    _>A lot of people don't pay attention to the fact that it's REP MOVS,
+      not REP MOV (even though you may say it like "rep-move").

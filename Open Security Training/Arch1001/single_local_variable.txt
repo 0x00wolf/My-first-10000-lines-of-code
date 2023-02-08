@@ -1,0 +1,16 @@
+Stack
+
+Addr            cmd         whats happening
+0x555555555129  mov         the value 0xca1ab1e is being
+                            placed into the address
+                            rbp-0x4
+0x555555555130  mov         move the value that is located
+                            at rbp-0x4 into the register
+                            eax
+0x555555555131  pop         the value in rbp from the stack
+
+0x555555555134  ret         return to main function
+
+0x555555555135  push        rbp to stack
+
+0x555555555136  move

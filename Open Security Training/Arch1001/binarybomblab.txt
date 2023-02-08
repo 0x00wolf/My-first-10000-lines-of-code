@@ -1,0 +1,10 @@
+~**-=-BinaryBombLab-=-**~
+           /\
+          /\/\
+         /\/\/\
+        /\/\/\/\
+     \\xXxXxXxXxX//
+    XXXXXXXXXXXXXXXX 
+From Carnegie Mellon University
+Intentionally difficult. Persevere...
+

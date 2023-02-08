@@ -1,0 +1,98 @@
+round 1     :       I am just a renegade hockey mom.
+round 2     :       1 2 4 8 16 32
+round 3     :       2 562      
+
+
+phase 3:
+sub 0x18 from rsp // make room on stack for variables
+move 0x28 into rax // 
+mov rax into rsp+0x8
+xor eax eax// clear eax
+rsp+0x4 into rcx
+move rsp into rdx
+load effective address rip+0x1caf into rsi
+call sscanf
+compare 0x1 to value in eax
+load effective address rip+0x1b22 into rd
+
+signed mov long into quadword (rdx + rax + 4) into rax
+add rdx to rax
+
+is a switch from 0-7 (8 options)
+    options select position to enter phase_3 main command exec
+
++44 cmp 1st compare, jump if eax <= 1.
+    checking number of args
+
++49 cmp 2nd compare, jump if int is > 7
+    1st input must be int 0-7 (select jump in switch)
+
+ 
+phase 4:
+if (!(argc == 3)):
+    exit(1);
+if (!(argv[1] <= 0xE))
+    exit(2);
+mov $0xe,%edx
+mov $0x0,%esi
+ni
+
+1)requires 2 int inputs
+2)1st instruction must be <=e
+3)2nd instruction must be 0xa
+4)1st instruction isn't 0, 1, 2,
+it's 3!
+input is 3, 10
+
+func4
+    +4  push    rbx
+    +5  mov %edx,$eax   // copy the value at edx into eax
+    +7  sub %esi,%eax   // subtract the value in esi from eax
+    +9  mov %eax,%ebx   // Copy the value at eax into ebx
+    +11 shr %0x1f,%ebx  // shift logical right ebx by 1f bits
+    +14 add %eax, $ebx  // add the value at eax into ebx
+    +16 sar %ebx        // shift logical
+    +18 add %esi,%ebx   // add the value esi into ebx
+    +20 cmp %edi,%ebx   // compare the value in %edi to %ebx
+    +22 jg              // jump greater
+        +30 lea -0x1(%rbx),%edx
+
+cmp $0xa, %eax      // compare eax to 10
+jne ->Explode bomb  // if not equal
+cmpl $0xa,0x4(%rsp) //c compare long 0xa to $rsp+0x4
+je                  // jump if equal or bomb detonates
+mov 0x8(%rsp),%rax  // move the value at %rsp+0x8 into %rax
+xor 0x28, %rax      // xor 0x28 and rax
+jne->stack chk fail
+add $0x18,%rsp      // add 0x18 to %rsp
+ret0x5555555557bf
+
+phase_5
+input is unsigned integer
+must be more than one input (2?)
+using 4, 8
+at +52 rax = 0x4, rdx = 0x8
++58 compare 0xf to %eax(1st input). detonate bomb if equal
++63 set ecx to 0
++68 set edx to 0
+
++85 The loop
+mov (rsi+rax+4), eax
+referencing a start point in  linked list
+answer is 5
+compare rsp+4 (second input) to 0x73 (115) 
+    if == defuse
+    else detonate
+answer is 5, 115
+
+
+phase_6
+requires 6 %d
++61-+86 loops through numbers and checks that they are all unique 
++133 points to a node
+node 1 -> 0x212 = 530 
+node 2 -> 0x1c2 = 450
+node 3 -> 0x215 = 533
+node 4 -> 0x393 = 915
+node 5 -> 0x3a7 = 935
+node 6 -> 0x200 = 512

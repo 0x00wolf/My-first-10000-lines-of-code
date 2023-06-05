@@ -1,0 +1,58 @@
+What is a crypter & stub?
+    A crypter is a program able to encrypt a binary/modify it so 
+    that it will decrypt itself at run-time. The stub is the component
+    of the modified binary that will decrypt it at runtime.
+
+How does it work?
+    The crypter crypts selected parts of the binary and then it
+    injects some code and makes sure it gets executed before anything
+    else in that binary.
+
+How it does it:
+    1) finds the parts of the binary to encrypt (usually .text and 
+                                                 .rodatai)
+    2) crypts them
+    3) injects the stub into the binary
+    4) payches the stub and the binary header to ensure the stub
+       is properly executed at runtime.
+
+xor encoding:
+    For each byte in plain text
+        encrypted_value = plain_value ^ Key_Valueo
+
+   >> in C code:
+
+    char key[KEY_LEN];
+    char msg[MSG_LEN];
+    int i, j;           // Indexes for msg and key respectively
+    
+    for (i = 0, j = 0; i < MSG_LEN; msg[i++] ^= key[j++], j%=KEY_LEN);
+
+   >> in pseudo code:
+    i = 0;
+    j = 0;
+    do {
+        msg[i] = msg[i] ^ key[j];
+        i++;   
+        j++;
+        j = j % KEY_LEN;
+    } while (i < MSG_LEN);  
+
+Creating a permutation matrix in C:
+    #define SWAP(a,b) a+=b; b=a-b; a-=b;
+    
+    for (i = 0; i < 255; S[i] = i, i++)
+        ;
+    for (j = 0, i = 0; i < 256; i++){
+        j = (j + S[i] + key[i % klen] ) % 256;
+        SWAP(S[i],S[j]);
+}
+    
+
+
+a = 30
+b = 20
+a = 50
+b = 50 - 20 = 30
+a = 50 - 30 = 20
+`

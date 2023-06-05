@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Functions: Task 1</title>
+        <style>
+            p {
+            color: purple;
+            margin: 0.5em 0;
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+        </style>
+    </head>
+  
+    <body>
+        <section class="preview">
+        </section>
+    </body>
+    <script>
+        const names = ['Chris', 'Li Kang', 'Anne', 'Francesca', 'Mustafa', 'Tina', 'Bert', 'Jada']
+        const para = document.createElement('p');
+        // Create function choose name that prints a random name from a provided 
+        // array to the provided paragraph. Then run it once
+        function chooseName() {
+            let randomNum = Math.floor(Math.random() * names.length);
+            const choosen = names[randomNum];
+            para.textContent = `${choosen}`;
+        }
+        const section = document.querySelector('section');
+        section.appendChild(para);
+        chooseName();
+  </script>
+
+</html>

@@ -1,0 +1,66 @@
+
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Simple DOM example</title>
+        <style>
+            .highlight {
+                color: white;
+                background-color: black;
+                padding: 10px;
+                width: 250px;
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <section>
+            <img src="dinosaur.png" alt="A red Tyrannosaurus Rex: A two legged dinosaur standing upright like a human, with small arms, and a large head with lots of sharp teeth.">
+            <p>Here we will add a link to the <a href="https://www.mozilla.org/">Mozilla homepage</a></p>
+        </section>
+        <script>
+            const link = document.querySelector("a");
+            link.textContent = "Mozilla Developer Network";
+            link.href = "https://developer.mozilla.org";
+
+            const sect = document.querySelector("section");
+            const para = document.createElement("p");
+            para.textContent = "We hope you enjoyed the ride.";
+            sect.appendChild(para);
+
+            const text = document.createTextNode(
+                " - the premier source for web development knowledge."
+            );
+
+            const linkPara = document.querySelector("p");
+            linkPara.appendChild(text);
+
+            const btn = document.createElement("button");
+            btn.innerText = "Click me";
+            
+            btn.onclick = function() {
+                btn.style.color = "white";
+                btn.style.backgroundColor = "Black";
+                window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+            }
+
+            document.body.appendChild(btn);
+            sect.appendChild(linkPara);
+            para.style.color = "white";
+            para.style.backgroundColor = "black";
+            para.style.padding = "10px";
+            para.style.width = "250px";
+            para.style.textAlign = "center";
+            btn.style.color = "black";
+            btn.style.backgroundColor = "red";
+            btn.style.padding = "10px";
+            btn.style.width = "60px";
+            btn.style.textAlign = "center";
+
+            para.setAttribute("class", "highlight");
+
+        </script>
+    </body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Shopping list example</title>
+        <style>
+            li {
+            margin-bottom: 10px;
+            }   
+            li button {
+            font-size: 8px;
+            margin-left: 20px;
+            color: #666;
+            }
+        </style>
+    <head>
+    <body>  
+        <input id="textBox" type="text" />
+        <div id="output"></div>
+        <script>
+            const textBox = document.querySelector("#textBox");
+            const output = document.querySelector("#output");
+
+            textBox.addEventListener("keydown", (event) => {
+                output.textContent = `You pressed ${event.key}.`;
+            });
+        </script>
+    </body>
+</html>

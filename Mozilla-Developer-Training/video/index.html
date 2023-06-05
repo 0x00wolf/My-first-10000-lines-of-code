@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Shopping list example</title>
+        <style>
+            li {
+            margin-bottom: 10px;
+            }   
+            li button {
+            font-size: 8px;
+            margin-left: 20px;
+            color: #666;
+            }
+        </style>
+    <head>
+    <body>  
+        <button>Display video</button>
+        <div class="hidden">
+            <iframe src="https://www.youtube...." anonymous></iframe>
+        </div>
+    </body>
+    <script>
+        const btn = document.querySelector("button");
+        const box = document.querySelector("div");
+        const iframeVid = document.querySelector("iframe");
+
+        btn.addEventListener("click", () => box.classList.remove("hidden"));
+
+        iframeVid.addEventListener("click", (event) => {
+            event.stopPropagation();
+            iframeVid.play();
+        });
+        box.addEventListener("click", ()=> box.classList.add("hidden"));
+    </script>
+</html>

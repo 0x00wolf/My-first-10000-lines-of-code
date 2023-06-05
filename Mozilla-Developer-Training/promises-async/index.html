@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Shopping list example</title>
+        <style>
+            li {
+            margin-bottom: 10px;
+            }   
+            li button {
+            font-size: 8px;
+            margin-left: 20px;
+            color: #666;
+            }
+        </style>
+    <head>
+    <body> 
+    </body>
+    <script>
+      const link = "https://mdn.github.io/learning-area/javascript/apis/fetching-data/can-store/products.json";
+      const fetchPromise = fetch(link);
+
+      fetchPromise
+        .then((response) => { 
+          if ( !response.ok) {
+            throw new Error (`HTTP error: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          console.log(data[0].name);
+        })
+        .catch((error) => {
+          console.error(`Could not get products: ${error}`);
+        });
+        /*
+        Sometimes, you need all the promises to be fulfilled, 
+        but they don't depend on each other. In a case like that, 
+        it's much more efficient to start them all off together, 
+        then be notified when they have all fulfilled. 
+        The Promise.all() method is what you need here. It takes 
+        an array of promises and returns a single promise. */
+
+      const fetchPromise1 = fetch("https://mdn.github.io/learning-area/javascript/apis/fetching-data/can-store/products.json");
+      const fetchPromise2 = fetch("https://mdn.github.io/learning-area/javascript/apis/fetching-data/can-store/not-found");
+      const fetchPromise3 = fetch("https://mdn.github.io/learning-area/javascript/oojs/json/superheroes.json");
+
+      Promise.all([fetchPromise1, fetchPromise2, fetchPromise3])
+        .then((responses) => {
+          for (const response of responses) {
+            console.log(`${response.url}: ${response.status}`);
+          }
+        })
+        catch((error) => {
+          console.error(`Failed to fetch: ${error}`);
+        });
+        
+      console.log("Started request...");
+    </script> 
+    
+</html>

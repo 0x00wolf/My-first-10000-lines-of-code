@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>event query prevent default</title>
+        <style>
+            li {
+            margin-bottom: 10px;
+            }   
+            li button {
+            font-size: 8px;
+            margin-left: 20px;
+            color: #666;
+            }
+        </style>
+    <head>
+    <body>  
+        <form>
+            <div>
+                <label for="fname">First name: </label>
+                <input id="fname" type="text" />
+            </div>
+            <div>
+                <label for="lname">Last name: </label>
+                <input id="lname" type="text" />
+            </div>
+            <div>
+                <input id="submit" type="submit" />
+            </div>
+        </form>>
+        <p></p>
+    </body>
+    <script>
+        const form = document.querySelector("form");
+        const fname = document.getElementById("fname");
+        const lname = document.getElementById("lname");
+        const para = document.querySelector("p");
+
+        form.addEventListener("submit", (e) => {
+            if (fname.value === "" || lname.value === "") {
+                e.preventDefault();
+                para.textContent = "You need to fill in both names!";
+            } else {
+                e.preventDefault();
+                para.textContent = `Hey, ${fname.value} ${lname.value}, lets party like it's 1999!`;
+            }
+        });
+    </script>
+</html>

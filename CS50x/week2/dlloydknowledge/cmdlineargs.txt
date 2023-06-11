@@ -1,0 +1,17 @@
+COMMANDER KEEN LINE ARGUMENTS
+
+//until this moment
+    int main(void)
+
+//adding data at runtime rather than while running
+    //void fails to do so
+
+to collect cmd line arguments:
+int main(int argc, string argv[])
+{
+    //string argv[] is an array of strings
+
+argc - arguments, an integer type variable and tells you how much stuff the user typed out
+argv - argument vector, an array that stores strings
+    argv[0] always the name of the program
+    argv[argc-1] always the last name. -1 is null.

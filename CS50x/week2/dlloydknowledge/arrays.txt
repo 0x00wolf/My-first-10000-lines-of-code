@@ -1,0 +1,72 @@
+Arrays
+
+Fundamental data structure for all languages
+Hold a single data type in continuous memory positions.
+    allows you to manipulate data without naming conventions
+    ex. mail bank in a post office (PO BOXs)
+
+//array declarations:
+type name[size];
+    type = data type of the array
+    name = variable name
+    size = how many elements (count from 0) aka william gibson count 0. neuromancer
+
+//instantation syntax
+bool array_name_is[3] = {false, true, true};
+    //0, 1, 2, and placeholder for memory to indicate end of array
+
+//same thing with individual elements
+bool array_name_is[3];
+array_name_is[0] = false;
+array_name_is[1] = true;
+array_name_is[2] = true;
+
+
+//Can't compare two strings in string have to use strcmp
+
+Assignment
+//make an array of 1-100 with looping
+//looping with arrays
+
+int foo[5] = {1, 2, 3, 4, 5,};
+int bar [5];
+
+for (int j = 0; j <5: j++)
+{
+    bar[j] = foo[j];
+}
+
+
+
+arrays are not passed by value. ie most values in C are passed
+by a copy
+in C arrays are NOT passed by value. THey get the array not hte local value of it
+so if you manipulate elements in an array with a function you make permanent changes to
+that array
+
+
+
+#include <stdio.h>
+
+//2 funct declarations
+void set_array(int array[4]);
+void set_int(int x);
+
+int main(void)
+{
+    int a = 10;
+    int b[4] = { 0, 1, 2, 3 };
+    set_int(a);
+    set_array(b);
+    printf("%d %d\n", a, b[0]);
+}
+
+void set_array(int array[4])
+{
+    array[0] = 22;
+}
+
+void set_int(int x)
+{
+    x = 22;
+}

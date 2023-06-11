@@ -1,3 +1,4 @@
+// Credit to https://github.com/t0uh33d/ this is a fork of a project he did.
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -8,7 +9,7 @@
 // initalize variables for x, and y coords for snake + cash
 int headX, headY, cashX, cashY;
 // create game board space
-int width = 30, height = 30;
+int width = 40, height = 30;
 int bodyX[1000], bodyY[1000];
 
 int gameOver = 0;
@@ -16,7 +17,7 @@ int direction = 2;
 int speeds = 0.8i;
 int length = 0;
 int score = 0;
-int speed = 60000;
+int speed = 100000;
 
 // main game functions
 void render(void);
@@ -44,7 +45,7 @@ void main() {
         usleep(speed);
     }
     usleep(speed);
-    system("clear");
+    for (int bb = 0; bb < 60; bb++) { printf("\n"); }
     printf("\n\n\n\t\tFINAL SCORE : %5d\n\n\t\tNOKIA BRICK FOREVER!!!\n\t\t(press any + enter to exit)\n\t\t\t>>", score);
     scanf(">>");
     system("clear");
@@ -52,7 +53,8 @@ void main() {
 
 // render game in terminal
 void render(void) {
-    system("clear");
+    // removed system("clear"), and replaced with a loop of printing new lines.
+    for (int b = 0; b < 60; b++) { printf("\n"); }
     int i, j, k, p;
     // iterate through all the y coords
     for (j = 0; j <= height; j++) {
@@ -185,14 +187,12 @@ void moveSnake(void) {
 
 void checkGameOver(void) {
     int i;
-    
+    if (headX == width || headX == 0 || headY == height || headY == 0) {
+            gameOver = 1;
+    }
     for (i = 0; i < length; i++) {
         // check if the head has collided with the body
         if (headX == bodyX[i] && headY == bodyY[i]) {
-            gameOver = 1;
-        }
-        // check if the head has collided with the border
-        if (headX == width || headX == 0 || headY == height || headY == 0) {
             gameOver = 1;
         }
     }

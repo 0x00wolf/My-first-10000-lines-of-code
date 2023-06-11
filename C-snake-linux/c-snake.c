@@ -233,3 +233,5 @@ char getch(void) {
     
     return(c);
 }
+
+// Code forked from: https://github.com/t0uh33d/C_programs/blob/main/snake_game_terminal_linux/snake_game.c

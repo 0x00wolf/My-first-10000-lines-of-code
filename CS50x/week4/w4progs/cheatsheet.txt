@@ -1,0 +1,5 @@
+
+Pointers:
+    - The & operator means get the address of this variable.
+    - The type *p declares the variable (with type) as a pointer
+    - * is also the dereference operator, which goes to an address to get teh value stored there

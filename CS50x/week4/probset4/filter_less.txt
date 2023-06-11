@@ -1,0 +1,29 @@
+//argc 4
+//argc 1 = prog name
+    //arg 2 = -r
+        //arg 3 = input imagefile name
+            //arg 4 = out imagefile name
+//24 bmp = 8 bits R, 8 bits G, 8 bits B.
+    //Hexidecimal so - 00-FF (0 to 255).
+// Probset4 uses BMP 4.0 (Microsoft debuted in WIN 95)
+
+//BMP HEADERS
+
+//FIRST - BITMAPFILEHEADER = 14 bytes
+//SECOND - BITMAPINFOHEADER = 40 bytes
+//THIRD - The image data
+    // Stored in an array of triples (24 bytes, comprised of respective BGR (rgb in reverse) pixel data)
+    //** White is 0xFFFFFF, Black is 0x000000
+
+//IMage filtering (looping through the pixels of an image and applying an affect to each dataset in the array)
+
+// Grayscale: (take an average of the values of each 24 byte valueset and change all values in the output of
+            // the corresponding dataset to the averaged amount)
+
+// Sepia: Uses an algorithm relative to the desired color scheme of the output.
+    //sepiaRed = .393* originalRed + .769 * originalGreen + .189 * originalBlue
+    //sepiaGreen = .349 * originalRed + .686 * originalGreen + .168 * originalBlue
+    //sepiaBlue = .272 * originalRed + .534 * originalGreen + .131 * originalBlue
+    //****Have to be rounded to the nearest integer. Must be capped at 255 if (outcome > 255)
+
+//Reflection

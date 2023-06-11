@@ -1,4 +1,3 @@
-// Credit to https://github.com/t0uh33d/ this is a fork of a project he did.
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>

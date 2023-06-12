@@ -64,7 +64,7 @@ $('#ac').click(() => {
 })
 
 $('#sign').click(() => {
-  if (firstChar() === '-'){
+  if (firstChar() === '-') {
       result = $('.result').text()
       sbstr = result.substring(1, result.length);
       $('.result').text(sbstr);
@@ -83,7 +83,7 @@ $('#percentage').click(() => {
 $('.operator').click(e => {
   id = e.target.id;
 
-  if (id === 'equal'){
+  if (id === 'equal') {
       calculate();
       $('.result').text(finalResult);
       operator = '';
@@ -98,7 +98,7 @@ $('.number').click(e => {
   id = e.target.id;
   num = numbers[id];
 
-  if (activeOperator){
+  if (activeOperator) {
       finalResult = parseFloat($('.result').text());
       $('.result').text('');
       activeOperator= false;

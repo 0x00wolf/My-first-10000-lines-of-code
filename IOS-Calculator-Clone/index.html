@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    
+    <title>IOS Calculator Clone</title>
+
+    <link rel="stylesheet" href="calc.css">
+    <link rel="icon" href="mine.ico">
+  </head>
+  <body>
+    <section>
+      <div class="calculator">
+        <div class="panel"><p class="result">1234</p></div>
+        <table>
+          <tr>
+            <td><button id="ac" class="btn special">AC</button></td>
+            <td><button id="sign" class="btn special">+/-</button></td>
+            <td><button id="percentage" class="btn special">%</button></td>
+            <td><button id="division" class="btn operator">/</button></td>
+          </tr>
+          <tr>
+            <td><button id="seven" class="btn number">7</button></td>
+            <td><button id="eight" class="btn number">8</button></td>
+            <td><button id="nine" class="btn number">9</button></td>
+            <td><button id="multiplication" class="btn operator">X</button></td>
+          </tr>
+          <tr>
+            <td><button id="four" class="btn number">4</button></td>
+            <td><button id="five" class="btn number">5</button></td>
+            <td><button id="six" class="btn number">6</button></td>
+            <td><button id="subtraction" class="btn operator">-</button></td>
+          </tr>
+          <tr>
+            <td><button id="one" class="btn number">1</button></td>
+            <td><button id="two" class="btn number">2</button></td>
+            <td><button id="three" class="btn number">3</button></td>
+            <td><button id="addition" class="btn operator">+</button></td>
+          </tr>
+          <tr>
+            <td colspan="2"><button id="zero" class="btn number"><p id="zero">0</p></button></td>
+            <td><button id="point" class="btn decimal">.</button></td>
+            <td><button id="equal" class="btn operator">=</button></td>
+          </tr>
+        </table>
+      </div>
+
+    </section>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+    <script src="./calc.js"></script>
+  </body>
+</html>

@@ -6,11 +6,8 @@
 #include <windows.h>
 #include <stdbool.h>
 
-// I am in the process of porting this to Linux.
-
 #define SNAKE_ARRAY_SIZE 310
 #include <unistd.h>
-
 
 #define UP 72
 #define DOWN 80
@@ -54,29 +51,18 @@ coordinate head, bend[500], food, body[30];
 
 int main() {
     char key;
-
     Print();
-
     system("cls");
-
     load();
-
     length = 5;
-
     head.x = 25;
     head.y = 20;
     head.direction = RIGHT;
-
     Border();
-
     Food();
-
     life = 3;
-
     bend[0] = head;
-
     Move();
-
     return 0;
 }
 
